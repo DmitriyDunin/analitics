@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function(){
-    let elem_click = '',
-        url = window.location.pathname;
+    let elem_click = '', // Нужен для условия, если на одной странице одинаковая форма (с name="...") расположена несколько раз (н-р, в попапе и статично на странице)
+        url = window.location.pathname; // Текущий URL. Нужен для условия, если одинаковая форма расположена на разных страницах и для этого разные цели (н-р, на главной одни цели метрики, в контактах у той же формы другие цели метрики)
 
-    // ym(13003426,'reachGoal', 'header_call_order_click');
+    // ym(13003426,'reachGoal', 'header_call_order_click'); // Пример отправки цели Яндекс.Метрика
 
     // Клик "Заказать звонок" (хедер)
     $('.widget-view-desktop-10 [data-action="forms.call.open"]').on('click', function(){
