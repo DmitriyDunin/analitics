@@ -1,126 +1,123 @@
-document.addEventListener('DOMContentLoaded', function(){
-    let elem_click = '', // Нужен для условия, если на одной странице одинаковая форма (с name="...") расположена несколько раз (н-р, в попапе и статично на странице)
-        url = window.location.pathname; // Текущий URL. Нужен для условия, если одинаковая форма расположена на разных страницах и для этого разные цели (н-р, на главной одни цели метрики, в контактах у той же формы другие цели метрики)
+const ymg_ym_id = 13003426; // Код счетчика YM
 
-    // ym(13003426,'reachGoal', 'header_call_order_click'); // Пример отправки цели Яндекс.Метрика
+let elem_click = '';
+
+// Отправляем цель
+function ymg_send (name, event = 'reachGoal') {
+    ym(ymg_ym_id, event, name);
+}
+
+// element - Селекторы элемента
+// metric_name - Название цели в метрике
+// target_name - Для уникальности формы на старнице
+function ymg_click (element, metric_name, target_name) {
+    $(element).on('click', function() {
+        ymg_send(metric_name);
+        elem_click = target_name;
+    });
+}
+
+// Проверяем на текущее имя и отправляем цель
+function ymg_is_target (target_name, goal_name, is_elem = elem_click ) {
+    let send = false;
+    if( is_elem === target_name ) {
+        ymg_send(goal_name);
+        send = true;
+    }
+    return send;
+}
+
+// функция возвращает cookie с именем name, если есть, если нет, то undefined
+function ymg_getCookie(name) {
+    let matches = document.cookie.match(new RegExp(
+        '(?:^|; )' + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    let url = window.location.pathname; // Текущий URL. Нужен для условия, если одинаковая форма расположена на разных страницах и для этого разные цели (н-р, на главной одни цели метрики, в контактах у той же формы другие цели метрики)
 
     // Клик "Заказать звонок" (хедер)
-    $('.widget-view-desktop-10 [data-action="forms.call.open"]').on('click', function(){
-        ym(13003426,'reachGoal', 'header_call_order_click');
-        elem_click = 'header';
-    });
+    ymg_click('.widget-view-desktop-10 [data-action="forms.call.open"]', 'header_call_order_click', 'header');
+
     // Клик "Заказать звонок" (футер)
-    $('.c-footer-template-1 [data-action="forms.call.open"]').on('click', function(){
-        ym(13003426,'reachGoal', 'footer_call_order_click');
-        elem_click = 'footer'; 
-    });
+    ymg_click('.c-footer-template-1 [data-action="forms.call.open"]', 'footer_call_order_click', 'footer');
+
     // Клик "Заказать" (листинг)
-    $('[data-role="item.order"]').on('click', function(){
-        ym(13003426,'reachGoal', 'listing_page_order_click');
-        elem_click = 'listing'; 
-    });
+    ymg_click('[data-role="item.order"]', 'listing_page_order_click', 'listing');
+
     // Клик "Заказать" (Карточка товара)
-    $('[data-role="order"]').on('click', function(){
-        ym(13003426,'reachGoal', 'card_page_order_click');
-        elem_click = 'card'; 
-    });
-    // Клик "Задать вопрос" 
-    $('.widget-web-form-2-section [data-role="form"]').on('click', function(){
-        ym(13003426,'reachGoal', 'question_click');
-        elem_click = 'popup'; 
-    });
+    ymg_click('[data-role="order"]', 'card_page_order_click', 'card');
+
+    // Клик "Задать вопрос"
+    ymg_click('.widget-web-form-2-section [data-role="form"]', 'question_click', 'popup');
+
     // Клик "Задать вопрос" (руководителю)
-    $('.widget-item-contact-button-wrap [data-role="form"]').on('click', function(){
-        ym(13003426,'reachGoal', 'boss_feedback_click');
-        elem_click = 'popup_boss'; 
-    });
+    ymg_click('.widget-item-contact-button-wrap [data-role="form"]', 'boss_feedback_click', 'popup_boss');
+
     // Клик "Оставить заявку"
-    $('.custom-order__button [data-role="trigger-form"]').on('click', function(){
-        ym(13003426,'reachGoal', 'catalog_application_click');
-        elem_click = 'page'; 
-    });
+    ymg_click('.custom-order__button [data-role="trigger-form"]', 'catalog_application_click', 'page');
 
     // Изменение инпутов в форме
     document.addEventListener('change', e => {
-        var form = e.target.closest('form').name;
-        var name = e.target.name;
-        
+        let form = e.target.closest('form').name,
+            name = e.target.name,
+            target_elems = false;
+
         switch (form){
             case 'SIMPLE_FORM_1': // Обратный звонок
                 switch (name){
                     case 'form_text_1': // Имя
-                        if(elem_click == 'header'){
-                            ym(13003426,'reachGoal', 'header_call_order_name');
-                        } else if(elem_click == 'footer'){
-                            ym(13003426,'reachGoal', 'footer_call_order_name');
-                        } else if(elem_click == 'page'){
-                            ym(13003426,'reachGoal', 'catalog_application_start');
-                        }
-                    break;
+                        ymg_is_target('header', 'header_call_order_name');
+                        ymg_is_target('footer', 'footer_call_order_name');
+                        ymg_is_target('page', 'catalog_application_start');
+                        break;
                     case 'form_text_2': // Телефон
-                        if(elem_click == 'header'){
-                            ym(13003426,'reachGoal', 'header_call_order_tel');
-                        } else if(elem_click == 'footer'){
-                            ym(13003426,'reachGoal', 'footer_call_order_tel');
-                        }
-                    break;
+                        ymg_is_target('header', 'header_call_order_tel');
+                        ymg_is_target('footer', 'footer_call_order_tel');
+                        break;
                 }
-            break;
+                break;
             case 'SIMPLE_FORM_3': // Заказать
                 switch (name){
                     case 'form_text_8': // Имя
-                        if(elem_click == 'listing'){
-                            ym(13003426,'reachGoal', 'listing_page_order_name');
-                        } else if(elem_click == 'card'){
-                            ym(13003426,'reachGoal', 'card_page_order_name');
-                        }
-                    break;
+                        ymg_is_target('listing', 'listing_page_order_name');
+                        ymg_is_target('card', 'card_page_order_name');
+                        break;
                     case 'form_text_10': // Телефон
-                        if(elem_click == 'listing'){
-                            ym(13003426,'reachGoal', 'listing_page_order_tel');
-                        } else if(elem_click == 'card'){
-                            ym(13003426,'reachGoal', 'card_page_order_tel');
-                        }
-                    break;
+                        ymg_is_target('listing', 'listing_page_order_tel');
+                        ymg_is_target('card', 'card_page_order_tel');
+                        break;
                 }
-            break;
+                break;
             case 'SIMPLE_FORM_2': // Задать вопрос
                 switch (name){
                     case 'form_text_3': // Имя
-                        if(elem_click == 'popup'){
-                            ym(13003426,'reachGoal', 'question_name');
-                        } else if(elem_click == 'popup_boss'){
-                            ym(13003426,'reachGoal', 'boss_feedback_start');
-                        } else {
-                            if(url == '/'){ // Форма на главной
-                                ym(13003426,'reachGoal', 'home_page_feedback_name');
-                            } else if(url == '/contacts/'){ // Форма на главной
-                                ym(13003426,'reachGoal', 'contacts_page_feedback_name');
-                            }
+                        target_elems = ymg_is_target('popup', 'question_name');
+                        target_elems = ymg_is_target('popup_boss', 'boss_feedback_start');
+
+                        if ( target_elems === false ) {
+                            ymg_is_target('/', 'home_page_feedback_name', url);
+                            ymg_is_target('/contacts/', 'contacts_page_feedback_name', url);
                         }
-                    break;
+                        break;
                     case 'form_textarea_4': // Вопрос
-                        if(elem_click == 'popup'){
-                            ym(13003426,'reachGoal', 'question_text');
-                        } else if(!elem_click) {
-                            if(url == '/'){
-                                ym(13003426,'reachGoal', 'home_page_feedback_text');
-                            } else if(url == '/contacts/'){ // Форма на главной
-                                ym(13003426,'reachGoal', 'contacts_page_feedback_text');
-                            }
+                        target_elems = ymg_is_target('popup', 'question_text');
+
+                        if ( target_elems === false ) {
+                            ymg_is_target('/', 'home_page_feedback_text', url);
+                            ymg_is_target('/contacts/', 'contacts_page_feedback_text', url);
                         }
-                    break;
+                        break;
                     case 'form_text_5': // Телефон
                         if(!elem_click) {
-                            if(url == '/'){
-                                ym(13003426,'reachGoal', 'home_page_feedback_tel');
-                            } else if(url == '/contacts/'){ // Форма на главной
-                                ym(13003426,'reachGoal', 'contacts_page_feedback_tel');
-                            }
+                            ymg_is_target('/', 'home_page_feedback_text', url);
+                            ymg_is_target('/contacts/', 'contacts_page_feedback_text', url);
                         }
-                    break;
+                        break;
                 }
-            break;
+                break;
         }
 
         // console.log(`Форма: ${form}, инпут: ${e.target.name}`)
@@ -129,84 +126,65 @@ document.addEventListener('DOMContentLoaded', function(){
     // Отправка формы
     document.addEventListener('submit', e => {
         var form = e.target.closest('form').name;
-        
+
         switch(form){
             case 'SIMPLE_FORM_1': // Обратный звонок
                 setTimeout(function(){
-                    if($('form[name="SIMPLE_FORM_1"]').length == 0){
-                        if(elem_click == 'header'){
-                            ym(13003426,'reachGoal', 'header_call_order_success_send');
-                        } else if(elem_click == 'footer'){
-                            ym(13003426,'reachGoal', 'footer_call_order_success_send');
-                        } else if(elem_click == 'page'){
-                            ym(13003426,'reachGoal', 'catalog_application_success_send');
-                        }
+                    if($('form[name="SIMPLE_FORM_1"]').length === 0){
+                        ymg_is_target('header', 'header_call_order_success_send');
+                        ymg_is_target('footer', 'footer_call_order_success_send');
+                        ymg_is_target('page', 'catalog_application_success_send');
                     }
                 }, 1000);
-            break;
+                break;
             case 'SIMPLE_FORM_3': // Заказать
                 setTimeout(function(){
-                    if($('form[name="SIMPLE_FORM_3"]').length == 0){
-                        if(elem_click == 'listing'){
-                            ym(13003426,'reachGoal', 'listing_page_order_success_send');
-                        } else if(elem_click == 'card'){
-                            ym(13003426,'reachGoal', 'card_page_order_success_send');
-                        }
+                    if($('form[name="SIMPLE_FORM_3"]').length === 0){
+                        ymg_is_target('listing', 'listing_page_order_success_send');
+                        ymg_is_target('card', 'card_page_order_success_send');
                     }
                 }, 1000);
-            break;
+                break;
             case 'SIMPLE_FORM_2': // Задать вопрос
                 setTimeout(function(){
-                    if($('form[name="SIMPLE_FORM_2"]').length == 0){
-                        if(url == '/contacts/'){
-                            ym(13003426,'reachGoal', 'contacts_page_feedback_success_send');
+                    if($('form[name="SIMPLE_FORM_2"]').length === 0){
+                        if(url === '/contacts/'){
+                            ymg_is_target('/contacts/', 'contacts_page_feedback_success_send', url);
                         }
-                    } else if($('.popup-window form[name="SIMPLE_FORM_2"]').length == 0){
-                        if(elem_click == 'popup_boss'){
-                            ym(13003426,'reachGoal', 'boss_feedback_success_send');
-                        } else if(elem_click == 'popup'){
-                            ym(13003426,'reachGoal', 'question_success_send');
-                        }
+                    } else if($('.popup-window form[name="SIMPLE_FORM_2"]').length === 0){
+                        ymg_is_target('popup_boss', 'boss_feedback_success_send');
+                        ymg_is_target('popup', 'question_success_send');
                     }
                 }, 1000);
-            break;
+                break;
         }
 
         // console.log(`Форма_1: ${form}, инпут: ${e.target.name}`);
     });
 
     // Форма с редиректом об успешной отправке
-    var params = window.location.search.replace('?','').split('&').reduce(
+    let params = window.location.search.replace('?','').split('&').reduce(
         function(p,e){
-            var a = e.split('=');
+            let a = e.split('=');
             p[ decodeURIComponent(a[0])] = decodeURIComponent(a[1]);
             return p;
         }, {}
     );
+
     if(params.RESULT_ID){
         switch(params.WEB_FORM_ID){
             case '2': // Задать вопрос
                 if(url == '/'){
-                    if(getCookie("home_page_feedback_success_send") != 'yes'){ // Защита от обновления страницы
-                        ym(13003426,'reachGoal', 'home_page_feedback_success_send');
-                        var date = new Date; date.setDate(date.getDate() + 3);	
+                    if(ymg_getCookie("home_page_feedback_success_send") != 'yes'){ // Защита от обновления страницы
+                        ymg_send('home_page_feedback_success_send');
+                        let date = new Date;
+                        date.setDate(date.getDate() + 3);
                         document.cookie = "home_page_feedback_success_send=yes; path=/; expires=" + date.toUTCString();
                     }
                 }
-            break;
+                break;
         }
     }
 
     // console.log(params);
-
-
-
 });
-
-// функция возвращает cookie с именем name, если есть, если нет, то undefined	
-function getCookie(name) {
-	var matches = document.cookie.match(new RegExp(
-    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
-	));
-	return matches ? decodeURIComponent(matches[1]) : undefined;
-}
